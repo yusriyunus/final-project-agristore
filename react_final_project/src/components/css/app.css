@@ -1,0 +1,32 @@
+#slider {
+  margin: 0;
+  padding: 0;
+  display: block;
+  width: 700vw;
+  height: 100%;
+  list-style: none;
+  background-color: rgb(6, 75, 6);
+}
+.sliderPage {
+  padding: 4vw 4vw 2vw 4vw;
+
+  float: left;
+  height: 90vh center center;
+  width: 100vw;
+}
+.sideBar {
+  padding: 0.2vw 2vw;
+  position: relative;
+}
+.sideBarTitle {
+  position: fixed;
+  line-height: 0;
+  font-weight: bold;
+}
+.sideBarTitle h1 {
+  padding-top: 2vw;
+  font-size: 2.8vw;
+}
+.sideBarTitle h3 {
+  font-size: 1.5vw;
+}
