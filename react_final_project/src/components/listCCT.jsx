@@ -31,38 +31,23 @@ class CCTlist extends Component {
   onfilterClick = filterBy => {
     console.log(filterBy);
     var newList = [];
-    this.state.productList.map(product => {
+    this.props.productList.map(product => {
       if (product.lokasiPengirim === filterBy) {
         newList.push(product);
       }
-      // else if (product.lokasiPengirim !== filterBy) {
-      //   newList = [{}];
-      // }
     });
-    this.setState({ productFilter: newList, filterStatus: true });
+    this.setState({ productList: newList, filterStatus: true });
   };
 
   onSortClick = index => {
-    if (!this.state.filterStatus) {
-      if (index === 3) {
-        this.state.productList.sort((x, y) => {
-          return x.price - y.price;
-        });
-      } else if (index === 4) {
-        this.state.productList.sort((x, y) => {
-          return y.price - x.price;
-        });
-      }
-    } else if (this.state.filterStatus) {
-      if (index === 3) {
-        this.state.productFilter.sort((x, y) => {
-          return x.price - y.price;
-        });
-      } else if (index === 4) {
-        this.state.productFilter.sort((x, y) => {
-          return y.price - x.price;
-        });
-      }
+    if (index === 3) {
+      this.state.productList.sort((x, y) => {
+        return x.price - y.price;
+      });
+    } else if (index === 4) {
+      this.state.productList.sort((x, y) => {
+        return y.price - x.price;
+      });
     }
     this.setState({ sortStatus: true });
   };
@@ -84,6 +69,7 @@ class CCTlist extends Component {
     alert("hapus semua");
     this.setState({
       productFilter: [],
+      productList: this.props.productList,
       filterStatus: false,
       sortStatus: false
     });
@@ -91,8 +77,9 @@ class CCTlist extends Component {
 
   renderProductList = () => {
     if (
-      !this.state.sortStatus ||
-      (this.props.productList.length !== 0 && !this.state.filterStatus)
+      // !this.state.sortStatus ||
+      this.props.productList.length !== 0
+      // && !this.state.filterStatus)
     ) {
       alert("sort sebelum filter");
       return this.state.productList.map((product, index) => {
@@ -107,24 +94,27 @@ class CCTlist extends Component {
         );
       });
     }
-    if (
-      this.state.sortStatus ||
-      (this.state.productFilter.length !== 0 && this.state.filterStatus)
+    // if (
+    //   this.state.sortStatus ||
+    //   (this.state.productFilter.length !== 0 && this.state.filterStatus)
+    // ) {
+    //   alert("sort setelah filter");
+    //   return this.state.productFilter.map((product, index) => {
+    //     return (
+    //       <GridCategory
+    //         key={index}
+    //         background={this.state.gridProp.color}
+    //         onDetailClick={() => this.onDetailClick(index)}
+    //         product={product.nama}
+    //         harga={product.price}
+    //       />
+    //     );
+    //   });
+    // }
+    else if (
+      this.state.productList.length === 0 &&
+      (this.state.filterStatus || this.state.sortStatus)
     ) {
-      alert("sort setelah filter");
-      return this.state.productFilter.map((product, index) => {
-        return (
-          <GridCategory
-            key={index}
-            background={this.state.gridProp.color}
-            onDetailClick={() => this.onDetailClick(index)}
-            product={product.nama}
-            harga={product.price}
-          />
-        );
-      });
-    }
-    if (this.state.productFilter.length === 0 && this.state.filterStatus) {
       return (
         <GridCategory
           background={this.state.gridProp.color}
@@ -133,15 +123,21 @@ class CCTlist extends Component {
           harga="-"
         />
       );
+    } else if (
+      this.state.productList.length === 0 ||
+      (!this.state.filterStatus || !this.state.sortStatus)
+    ) {
+      return (
+        <GridCategory
+          background={this.state.gridProp.color}
+          onDetailClick={this.onDetailClick}
+          product={
+            <img src={loading} style={{ width: "4vw", height: "auto" }} />
+          }
+          harga="0"
+        />
+      );
     }
-    return (
-      <GridCategory
-        background={this.state.gridProp.color}
-        onDetailClick={this.onDetailClick}
-        product={<img src={loading} style={{ width: "4vw", height: "auto" }} />}
-        harga="0"
-      />
-    );
   };
 
   render() {
