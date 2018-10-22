@@ -4,6 +4,7 @@ import { categoryOnClick } from "../actioncreators/index";
 import loading from "../components/pics/loading.gif";
 import GridCategory from "./gridcategory";
 import Sidebar from "./sidebar";
+import Rating from "./rating";
 
 class CCTlist extends Component {
   state = {
@@ -120,7 +121,7 @@ class CCTlist extends Component {
   onDetailClick = index => {
     this.setState({
       displayDetail: "flex",
-      productOnClick: this.state.productList[index]
+      productOnClick: [this.state.productList[index], 0]
     });
   };
 
@@ -207,6 +208,10 @@ class CCTlist extends Component {
     }
   };
 
+  renderRating = () => {
+    return <Rating />;
+  };
+
   render() {
     console.log(this.props.products);
     // const { Default } = this.props.margin;
@@ -217,7 +222,7 @@ class CCTlist extends Component {
             <Sidebar
               sidebarProp={this.state.sidebarProp}
               display={this.state.displayDetail}
-              productOnClick={this.state.productOnClick}
+              productOnClick={this.state.productOnClick[0]}
               onCloseClick={this.onCloseClick}
               user={this.props.auth}
               sorting={this.onSortClick}
@@ -225,6 +230,7 @@ class CCTlist extends Component {
               filterPromosi={this.onFilterPromosiClick}
               filterHarga={this.onFilterHargaClick}
               deleteAll={this.onDeleteAllClick}
+              ratingDefault={this.state.productOnClick[1]}
             />
           </div>
           <div

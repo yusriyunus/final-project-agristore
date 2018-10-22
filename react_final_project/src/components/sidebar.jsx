@@ -3,9 +3,10 @@ import axios from "axios";
 import { cartModified } from "../actioncreators";
 import { connect } from "react-redux";
 import { API_URL_AGRISTORE } from "../supports/apiurl/apiurl";
-import DikirimDari from "./filterDikirimDari";
-import Promosi from "./filterPromosi";
+// import DikirimDari from "./filterDikirimDari";
+// import Promosi from "./filterPromosi";
 import Footer from "./footer";
+import Rating from "./rating";
 
 class Sidebar extends Component {
   state = {
@@ -103,7 +104,7 @@ class Sidebar extends Component {
       this.props.filterDaerah(filterBy);
     }
   };
-  
+
   onFilterPromosi = (id, filterBy) => {
     for (var i = 0; i < this.state.promosi.length; i++) {
       document.getElementById(`promosi${i}`).checked = false;
@@ -266,6 +267,7 @@ class Sidebar extends Component {
                 >
                   <h3>Add to cart</h3>
                 </div>
+                <Rating ratingDefault={this.props.ratingDefault} />
               </div>
             </div>
           </div>
