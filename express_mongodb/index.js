@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const mongodb = require("mongodb");
 const MongoClient = require("mongodb").MongoClient;
 const Crypto = require("crypto");
 
@@ -80,17 +81,32 @@ app.post("/register", (req, res) => {
   );
 });
 
-app.get("/cct", (req, res) => {
-  MongoClient.connect(
-    url,
-    (err, db) => {
-      productCol = db.collection("cct");
-      productCol.find().toArray((err1, docs) => {
-        if (err1) console.log(err1);
-        res.send(docs);
-      });
-    }
-  );
+app.post("/cct", (req, res) => {
+  const { nama } = req.body;
+  console.log(req.body);
+  if (nama === undefined) {
+    MongoClient.connect(
+      url,
+      (err, db) => {
+        productCol = db.collection("cct");
+        productCol.find().toArray((err1, docs) => {
+          if (err1) console.log(err1);
+          res.send(docs);
+        });
+      }
+    );
+  } else {
+    MongoClient.connect(
+      url,
+      (err, db) => {
+        productCol = db.collection("cct");
+        productCol.find({ nama }).toArray((err1, docs) => {
+          if (err1) console.log(err1);
+          res.send(docs);
+        });
+      }
+    );
+  }
 });
 
 app.post("/addtocart", (req, res) => {
@@ -230,19 +246,53 @@ app.post("/checkout", (req, res) => {
 
 app.post("/payment", (req, res) => {
   console.log(req.body);
-  var { email } = req.body[0];
+  var { email, cartOnCheckOut } = req.body[0];
   var cartOnCheckOutId = req.body[1];
   var usertransaction = req.body[2];
+  // var products = req.body[3];
   MongoClient.connect(
     url,
     (err, db) => {
+      console.log(cartOnCheckOut);
+      console.log(cartOnCheckOutId);
       userCol = db.collection("users");
       transactionCol = db.collection("transaction");
+      // var index = 0;
+      // Update product's amount available
+      usertransaction.map((product, index) => {
+        if (
+          cartOnCheckOut[index].stokTersedia - cartOnCheckOut[index].amount >
+          0
+        ) {
+          productsCol = db.collection(`${product.category}`);
+          return productsCol.update(
+            {
+              _id: mongodb.ObjectId(cartOnCheckOut[index]._id)
+            },
+            {
+              $set: {
+                stokTersedia:
+                  cartOnCheckOut[index].stokTersedia -
+                  cartOnCheckOut[index].amount
+              }
+            }
+          );
+        } else {
+          productsCol = db.collection(`${product.category}`);
+          return productsCol.remove({
+            _id: mongodb.ObjectId(cartOnCheckOut[index]._id)
+          });
+        }
+      });
+      // Delete user's cart on checkout
       cartOnCheckOutId.map(id => {
         return userCol.update({ email }, { $pull: { cart: { id } } });
       });
+      // Empty user's cartOnCheckout
       userCol.update({ email }, { $set: { cartOnCheckOut: [] } });
+      // Add transaction success
       transactionCol.insertMany(usertransaction);
+      // Get new data
       userCol.find({ email }).toArray((err, docs) => {
         if (err) console.log(err);
         res.send(docs);

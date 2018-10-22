@@ -28,7 +28,7 @@ class Hotlist extends Component {
   };
 
   render() {
-    const { Default } = this.props.margin;
+    // const { Default } = this.props.margin;
     return (
       <div className="sliderPage">
         <div className="row" style={{ margin: 0 }}>
@@ -61,7 +61,7 @@ class Hotlist extends Component {
                     cursor: "pointer"
                   }}
                   onClick={() => {
-                    Default(-400, -100, 0.2);
+                    this.props.pageOnSliding(-400, -100);
                   }}
                 >
                   <h3 className="glyphicon glyphicon-th" />

@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { categoryOnClick } from "../actioncreators/index";
 import loading from "../components/pics/loading.gif";
 import GridCategory from "./gridcategory";
 import Sidebar from "./sidebar";
@@ -17,6 +18,7 @@ class CCTlist extends Component {
     displayDetail: "none",
     productList: this.props.productList,
     filterStatus: false,
+    filterPromosiStatus: false,
     sortStatus: false,
     productFilter: [],
     productOnClick: {}
@@ -26,30 +28,93 @@ class CCTlist extends Component {
     if (newProps.productList.length !== 0) {
       this.setState({ productList: newProps.productList });
     }
+    // if (newProps.products.cct.length !== 0) {
+    //   this.setState({ productList: newProps.products });
+    // }
   }
 
-  onfilterClick = filterBy => {
+  onFilterDaerahClick = filterBy => {
     console.log(filterBy);
     var newList = [];
-    this.props.productList.map(product => {
-      if (product.lokasiPengirim === filterBy) {
+    if (!this.state.filterPromosiStatus) {
+      this.props.productList.map(product => {
+        if (product.lokasiPengirim === filterBy) {
+          newList.push(product);
+        }
+      });
+      this.setState({ productList: newList, filterStatus: true });
+    } else {
+      this.props.productList.map(product => {
+        if (product.lokasiPengirim === filterBy) {
+          newList.push(product);
+        }
+      });
+      this.setState({
+        productList: newList,
+        filterStatus: true,
+        filterPromosiStatus: false
+      });
+    }
+  };
+
+  onFilterPromosiClick = filterBy => {
+    console.log(filterBy);
+    var newList = [];
+    // if (+!this.state.filterPromosiStatus && this.state.filterStatus) {
+    this.state.productList.map(product => {
+      if (product.promosi === filterBy) {
         newList.push(product);
       }
     });
-    this.setState({ productList: newList, filterStatus: true });
+    this.setState({ productFilter: newList, filterPromosiStatus: true });
+    // }
+  };
+
+  onFilterHargaClick = (hargamin, hargamaks) => {
+    var newList = [];
+    if (!this.state.filterStatus) {
+      this.state.productList.filter(product => {
+        if (hargamin <= product.price && product.price <= hargamaks) {
+          newList.push(product);
+          console.log(product.price);
+        }
+      });
+      this.setState({ productList: newList, filterStatus: true });
+    } else {
+      this.state.productFilter.filter(product => {
+        if (hargamin <= product.price && product.price <= hargamaks) {
+          newList.push(product);
+          console.log(product.price);
+        }
+      });
+      this.setState({ productList: newList, filterStatus: true });
+    }
   };
 
   onSortClick = index => {
-    if (index === 3) {
-      this.state.productList.sort((x, y) => {
-        return x.price - y.price;
-      });
-    } else if (index === 4) {
-      this.state.productList.sort((x, y) => {
-        return y.price - x.price;
-      });
+    if (!this.state.filterPromosiStatus) {
+      if (index === 3) {
+        this.state.productList.sort((x, y) => {
+          return x.price - y.price;
+        });
+      } else if (index === 4) {
+        this.state.productList.sort((x, y) => {
+          return y.price - x.price;
+        });
+      }
+      this.setState({ sortStatus: true });
+    } else {
+      if (index === 3) {
+        this.state.productFilter.sort((x, y) => {
+          return x.price - y.price;
+        });
+      } else if (index === 4) {
+        this.state.productFilter.sort((x, y) => {
+          return y.price - x.price;
+        });
+      }
+      this.setState({ sortStatus: true });
     }
-    this.setState({ sortStatus: true });
   };
 
   onDetailClick = index => {
@@ -67,22 +132,37 @@ class CCTlist extends Component {
 
   onDeleteAllClick = () => {
     alert("hapus semua");
+    this.props.categoryOnClick("cct");
     this.setState({
       productFilter: [],
-      productList: this.props.productList,
       filterStatus: false,
+      filterPromosiStatus: false,
       sortStatus: false
     });
   };
 
   renderProductList = () => {
     if (
-      // !this.state.sortStatus ||
-      this.props.productList.length !== 0
-      // && !this.state.filterStatus)
+      (this.state.productList.length === 0 && this.state.filterStatus) ||
+      (this.state.filterPromosiStatus && this.state.productFilter.length === 0)
     ) {
-      alert("sort sebelum filter");
-      return this.state.productList.map((product, index) => {
+      alert("tidak ada produk");
+      // else {
+      return (
+        <GridCategory
+          background={this.state.gridProp.color}
+          onDetailClick={this.onDetailClick}
+          product="Product Tidak Tersedia"
+          harga="-"
+        />
+      );
+    }
+    if (
+      this.state.productFilter.length !== 0 &&
+      this.state.filterPromosiStatus
+    ) {
+      // alert("sort sebelum filter");
+      return this.state.productFilter.map((product, index) => {
         return (
           <GridCategory
             key={index}
@@ -94,37 +174,23 @@ class CCTlist extends Component {
         );
       });
     }
-    // if (
-    //   this.state.sortStatus ||
-    //   (this.state.productFilter.length !== 0 && this.state.filterStatus)
-    // ) {
-    //   alert("sort setelah filter");
-    //   return this.state.productFilter.map((product, index) => {
-    //     return (
-    //       <GridCategory
-    //         key={index}
-    //         background={this.state.gridProp.color}
-    //         onDetailClick={() => this.onDetailClick(index)}
-    //         product={product.nama}
-    //         harga={product.price}
-    //       />
-    //     );
-    //   });
-    // }
-    else if (
+    if (this.props.productList.length !== 0) {
+      alert("sort sebelum filter");
+      return this.state.productList.map((product, index) => {
+        return (
+          <GridCategory
+            key={index}
+            background={this.state.gridProp.color}
+            onDetailClick={() => this.onDetailClick(index)}
+            product={product.nama}
+            harga={product.price}
+            stok={product.stokTersedia}
+          />
+        );
+      });
+    }
+    if (
       this.state.productList.length === 0 &&
-      (this.state.filterStatus || this.state.sortStatus)
-    ) {
-      return (
-        <GridCategory
-          background={this.state.gridProp.color}
-          onDetailClick={this.onDetailClick}
-          product="Product Tidak Tersedia"
-          harga="-"
-        />
-      );
-    } else if (
-      this.state.productList.length === 0 ||
       (!this.state.filterStatus || !this.state.sortStatus)
     ) {
       return (
@@ -135,14 +201,15 @@ class CCTlist extends Component {
             <img src={loading} style={{ width: "4vw", height: "auto" }} />
           }
           harga="0"
+          stok="-"
         />
       );
     }
   };
 
   render() {
-    console.log(this.state);
-    const { Default } = this.props.margin;
+    console.log(this.props.products);
+    // const { Default } = this.props.margin;
     return (
       <div className="sliderPage" style={{}}>
         <div className="row" style={{ margin: 0 }}>
@@ -154,7 +221,9 @@ class CCTlist extends Component {
               onCloseClick={this.onCloseClick}
               user={this.props.auth}
               sorting={this.onSortClick}
-              filter={this.onfilterClick}
+              filterDaerah={this.onFilterDaerahClick}
+              filterPromosi={this.onFilterPromosiClick}
+              filterHarga={this.onFilterHargaClick}
               deleteAll={this.onDeleteAllClick}
             />
           </div>
@@ -186,7 +255,8 @@ class CCTlist extends Component {
                     // zIndex: 1
                   }}
                   onClick={() => {
-                    Default(-400, -100, 0.3);
+                    // Default(-400, -100, 0.3);
+                    this.props.pageOnSliding(-400, -100);
                   }}
                 >
                   <h3 className="glyphicon glyphicon-th" />
@@ -211,8 +281,12 @@ class CCTlist extends Component {
 }
 
 const mapStateToProps = globalState => {
-  const auth = globalState.auth;
-  return { auth };
+  const { auth, products } = globalState;
+  // const products = globalState.products;
+  return { auth, products };
 };
 
-export default connect(mapStateToProps)(CCTlist);
+export default connect(
+  mapStateToProps,
+  { categoryOnClick }
+)(CCTlist);

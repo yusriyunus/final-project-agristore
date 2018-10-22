@@ -18,9 +18,9 @@ class Sidebar extends Component {
     ],
     promosi: [
       "Gratis Ongkir",
-      "Dengan Diskon",
-      "COD",
-      "Garansi Harga Termurah"
+      // "Dengan Diskon",
+      "COD"
+      // "Garansi Harga Termurah"
     ],
     sort: [
       "Populer",
@@ -53,19 +53,23 @@ class Sidebar extends Component {
     document.getElementById("detail").style.display = "none";
   };
   onAddToCartClick = () => {
-    axios
-      .post(API_URL_AGRISTORE + "/addtocart", [
-        { email: this.props.user.email, cart: this.props.user.cart },
-        this.state.productOnClick,
-        1
-      ])
-      .then(res => {
-        alert("added to cart");
-        this.props.cartModified(res);
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    if (this.props.auth.username === "") {
+      alert("Please Login First");
+    } else {
+      axios
+        .post(API_URL_AGRISTORE + "/addtocart", [
+          { email: this.props.user.email, cart: this.props.user.cart },
+          this.state.productOnClick,
+          1
+        ])
+        .then(res => {
+          alert("added to cart");
+          this.props.cartModified(res);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
   };
   ///////////////////////////////
 
@@ -78,12 +82,40 @@ class Sidebar extends Component {
     this.props.sorting(index);
   };
 
-  onFilterClick = (id, filterBy) => {
-    for (var i = 0; i < this.state.lokasiPengirim.length; i++) {
-      document.getElementById(`filter${i}`).checked = false;
+  onFilterDaerah = (id, filterBy) => {
+    if (
+      document.getElementById("promosi0").checked === true ||
+      document.getElementById("promosi1").checked === true
+    ) {
+      for (var i = 0; i < this.state.promosi.length; i++) {
+        document.getElementById(`promosi${i}`).checked = false;
+      }
+      for (var i = 0; i < this.state.lokasiPengirim.length; i++) {
+        document.getElementById(`filter${i}`).checked = false;
+      }
+      document.getElementById(id).checked = true;
+      this.props.filterDaerah(filterBy);
+    } else {
+      for (var i = 0; i < this.state.lokasiPengirim.length; i++) {
+        document.getElementById(`filter${i}`).checked = false;
+      }
+      document.getElementById(id).checked = true;
+      this.props.filterDaerah(filterBy);
+    }
+  };
+  
+  onFilterPromosi = (id, filterBy) => {
+    for (var i = 0; i < this.state.promosi.length; i++) {
+      document.getElementById(`promosi${i}`).checked = false;
     }
     document.getElementById(id).checked = true;
-    this.props.filter(filterBy);
+    this.props.filterPromosi(filterBy);
+  };
+
+  onFilterHargaClick = () => {
+    var hargamin = this.refs.hargamin.value;
+    var hargamaks = this.refs.hargamaks.value;
+    this.props.filterHarga(hargamin, hargamaks);
   };
 
   onDeleteAllClick = () => {
@@ -91,6 +123,8 @@ class Sidebar extends Component {
     for (var i = 0; i < this.state.checkBoxAmount; i++) {
       document.getElementsByClassName("checkbox")[i].checked = false;
     }
+    this.refs.hargamin.value = "RP MIN";
+    this.refs.hargamaks.value = "RP MAKS";
     // this.setState({});
     this.props.deleteAll();
   };
@@ -106,7 +140,7 @@ class Sidebar extends Component {
             type="checkbox"
             value="Jabodetabek"
             onChange={() => {
-              this.onFilterClick("filter" + index, component);
+              this.onFilterDaerah("filter" + index, component);
             }}
           />
           <h3 style={{ marginLeft: 10 + "px" }}>{component}</h3>
@@ -115,8 +149,20 @@ class Sidebar extends Component {
     ));
   };
   renderPromosi = () => {
-    return this.state.promosi.map((x, index) => (
-      <Promosi key={index} promosi={x} />
+    return this.state.promosi.map((component, index) => (
+      <label className="container">
+        <div className="row">
+          <input
+            id={`promosi${index}`}
+            className="checkbox"
+            type="checkbox"
+            onChange={() => {
+              this.onFilterPromosi("promosi" + index, component);
+            }}
+          />
+          <h3 style={{ marginLeft: 10 + "px" }}>{component}</h3>
+        </div>
+      </label>
     ));
   };
   renderSort = () => {
@@ -144,7 +190,7 @@ class Sidebar extends Component {
 
   render() {
     const { title, detail } = this.props.sidebarProp;
-    // console.log(this.state);
+    console.log(this.props);
     return (
       <div
         ref="sidebar"
@@ -166,8 +212,8 @@ class Sidebar extends Component {
             height: "100vw",
             position: "absolute",
             display: this.props.display,
-            flexDirection: "column"
-            // flexWrap: "wrap"
+            flexDirection: "column",
+            zIndex: 1
           }}
         >
           <div className="row" style={{ padding: "0" }}>
@@ -308,6 +354,7 @@ class Sidebar extends Component {
                 <div className="row">
                   <h4>
                     <input
+                      ref="hargamin"
                       style={{
                         color: "grey",
                         width: 7 + "vmax",
@@ -327,6 +374,7 @@ class Sidebar extends Component {
                   />
                   <h4>
                     <input
+                      ref="hargamaks"
                       style={{
                         color: "grey",
                         width: 7 + "vmax",
@@ -342,6 +390,7 @@ class Sidebar extends Component {
                     type="button"
                     className="btn"
                     style={{ width: 17 + "vmax" }}
+                    onClick={this.onFilterHargaClick}
                   >
                     <h4 style={{ color: "black", margin: 0 }}>TERAPKAN</h4>
                   </button>
@@ -373,7 +422,12 @@ class Sidebar extends Component {
   }
 }
 
+const mapStateToProps = globalState => {
+  const auth = globalState.auth;
+  return { auth };
+};
+
 export default connect(
-  null,
+  mapStateToProps,
   { cartModified }
 )(Sidebar);

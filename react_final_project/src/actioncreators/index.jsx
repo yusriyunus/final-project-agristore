@@ -98,3 +98,42 @@ export const cookieChecked = () => {
     type: "COOKIES_CHECKED"
   };
 };
+
+const product = {
+  cct: [],
+  fruits: [],
+  vegetables: [],
+  spices: []
+};
+const keys = Object.keys(product);
+export const categoryOnClick = (category, searchBy) => {
+  console.log(category, searchBy);
+  return dispatch => {
+    axios
+      .post(API_URL_AGRISTORE + `/${category}`, { nama: searchBy })
+      .then(res => {
+        for (var i = 0; i < keys.length; i++) {
+          if (keys[i] == category) {
+            product[keys[i]] = res.data;
+          }
+        }
+        console.log(product);
+        // this.state[category] = res.data;
+        // this.setState();
+        if (searchBy !== undefined) {
+          dispatch({
+            type: "GET_SEARCH_PRODUCTS",
+            payload: product
+          });
+        } else {
+          dispatch({
+            type: "GET_ALL_PRODUCTS",
+            payload: product
+          });
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+};

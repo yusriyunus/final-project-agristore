@@ -157,6 +157,14 @@ class Checkout extends Component {
     }
   };
 
+  preventCartAmountMoreThanStock = index => {
+    if (this.state.cart[index].amount === this.state.cart[index].stokTersedia) {
+      return ["none", "grey"];
+    } else {
+      return ["all", "rgba(6, 71, 6, 1)"];
+    }
+  };
+
   onCheckBoxClicked = (
     cartOnUpdated,
     indexCartOnUpdated,
@@ -352,11 +360,14 @@ class Checkout extends Component {
                   className="glyphicon glyphicon-plus"
                   style={{
                     fontSize: ".8vw",
-                    color: "rgba(6, 71, 6, 1)",
-                    border: "1px solid rgba(6, 71, 6, 1)",
+                    color: this.preventCartAmountMoreThanStock(index)[1],
+                    border:
+                      "1px solid " +
+                      this.preventCartAmountMoreThanStock(index)[1],
                     borderRadius: "3vw",
                     padding: ".5vw",
-                    cursor: "pointer"
+                    cursor: "pointer",
+                    pointerEvents: this.preventCartAmountMoreThanStock(index)[0]
                   }}
                   onClick={() =>
                     this.onUpdateCartAmountClick(

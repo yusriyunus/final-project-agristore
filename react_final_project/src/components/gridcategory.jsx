@@ -32,6 +32,7 @@ class GridCategory extends Component {
             <h3>
               {this.props.product}/{this.props.harga}
             </h3>
+            <h2>{this.props.stok}</h2>
           </center>
         </div>
       </div>

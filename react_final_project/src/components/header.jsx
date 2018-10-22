@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { onLogOut } from "../actioncreators";
+import { onLogOut, categoryOnClick } from "../actioncreators";
 import {
   Button,
   Collapse,
@@ -28,7 +28,22 @@ class Header extends Component {
     displayLogin: "none",
     displayRegister: "none",
     cart: this.props.auth.cart,
-    amount: 0
+    categoryOnClick: "",
+    amount: 0,
+    pageOnSliding: {
+      cct: () => {
+        return this.props.pageOnSliding(0, 0);
+      },
+      vegetables: () => {
+        return this.props.pageOnSliding(-100, 0);
+      },
+      fruits: () => {
+        return this.props.pageOnSliding(-200, 0);
+      },
+      spices: () => {
+        return this.props.pageOnSliding(-300, 0);
+      }
+    }
   };
 
   componentWillReceiveProps(newProps) {
@@ -49,6 +64,11 @@ class Header extends Component {
     if (newProps.auth.cart !== this.props.auth.cart) {
       this.setState({ cart: newProps.auth.cart, amount: this.cartAmount() });
     }
+    if (!newProps.products.searchClick) {
+      document.getElementById("searchBox").value = null;
+      document.getElementById("exampleCustomSelect").value = "";
+      this.setState({ categoryOnClick: "" });
+    }
   }
 
   toggle = () => {
@@ -57,15 +77,26 @@ class Header extends Component {
     });
   };
 
-  renderCartList = () => {
-    console.log(this.state.cart, "cart");
-    return this.state.cart.map((product, index) => {
-      return (
-        <div key={index} className="d-flex justify-content-center">
-          <h3>{product.nama}</h3>
-        </div>
-      );
-    });
+  onSearchClick = category => {
+    if (this.state.categoryOnClick !== "") {
+      var searchBox = document.getElementById("searchBox");
+      searchBox.value =
+        searchBox.value.charAt(0).toUpperCase() + searchBox.value.slice(1);
+      console.log(searchBox.value);
+      if (searchBox.value !== "") {
+        this.props.categoryOnClick(category, searchBox.value);
+      } else {
+        alert("getallproducts");
+        this.props.categoryOnClick(category);
+      }
+      this.state.pageOnSliding[category]();
+    } else {
+      alert("You Forgot to Select Category");
+    }
+  };
+
+  categoryOnClick = product => {
+    this.setState({ categoryOnClick: product });
   };
 
   onLogOutClick = () => {
@@ -88,7 +119,19 @@ class Header extends Component {
     this.setState({ displayRegister: x });
   };
 
+  renderCartList = () => {
+    console.log(this.state.cart, "cart");
+    return this.state.cart.map((product, index) => {
+      return (
+        <div key={index} className="d-flex justify-content-center">
+          <h3>{product.nama}</h3>
+        </div>
+      );
+    });
+  };
+
   render() {
+    console.log(this.state);
     if (this.props.auth.username === "") {
       // console.log(this.state.isOpen);
       return (
@@ -143,12 +186,15 @@ class Header extends Component {
                 type="text"
                 placeholder="Search product..."
                 name="search"
+                id="searchBox"
+                defaultValue=""
                 style={{
                   width: "15vw",
                   margin: 0,
                   fontSize: "1.4rem",
                   borderColor: "white",
-                  borderWidth: 0
+                  borderWidth: 0,
+                  textTransform: "capitalize"
                 }}
               />
               <FormGroup
@@ -170,17 +216,51 @@ class Header extends Component {
                     paddingLeft: "0"
                   }}
                 >
-                  <option value="">Select Category</option>
-                  <option>Cofffee, Cocoa, and Tea</option>
-                  <option>Vegetable</option>
-                  <option>Fruit</option>
-                  <option>Spice</option>
+                  <option
+                    value=""
+                    onClick={() => {
+                      this.categoryOnClick("");
+                    }}
+                  >
+                    Select Category
+                  </option>
+                  <option
+                    onClick={() => {
+                      this.categoryOnClick("cct");
+                    }}
+                  >
+                    Cofffee, Cocoa, and Tea
+                  </option>
+                  <option
+                    onClick={() => {
+                      this.categoryOnClick("vegetables");
+                    }}
+                  >
+                    Vegetables
+                  </option>
+                  <option
+                    onClick={() => {
+                      this.categoryOnClick("fruits");
+                    }}
+                  >
+                    Fruits
+                  </option>
+                  <option
+                    onClick={() => {
+                      this.categoryOnClick("spices");
+                    }}
+                  >
+                    Spices
+                  </option>
                 </CustomInput>
               </FormGroup>
               <div
                 className="btn btn-light"
                 size="lg"
                 style={{ margin: 0, display: "inline" }}
+                onClick={() => {
+                  this.onSearchClick(this.state.categoryOnClick);
+                }}
               >
                 <i
                   className="glyphicon glyphicon-search"
@@ -345,12 +425,15 @@ class Header extends Component {
               type="text"
               placeholder="Search product..."
               name="search"
+              id="searchBox"
+              defaultValue=""
               style={{
                 width: "15vw",
                 margin: 0,
                 fontSize: "1.4rem",
                 borderColor: "white",
-                borderWidth: 0
+                borderWidth: 0,
+                textTransform: "capitalize"
               }}
             />
             <FormGroup
@@ -372,17 +455,51 @@ class Header extends Component {
                   paddingLeft: "0"
                 }}
               >
-                <option value="">Select Category</option>
-                <option>Cofffee, Cocoa, and Tea</option>
-                <option>Vegetable</option>
-                <option>Fruit</option>
-                <option>Spice</option>
+                <option
+                  value=""
+                  onClick={() => {
+                    this.categoryOnClick("");
+                  }}
+                >
+                  Select Category
+                </option>
+                <option
+                  onClick={() => {
+                    this.categoryOnClick("cct");
+                  }}
+                >
+                  Cofffee, Cocoa, and Tea
+                </option>
+                <option
+                  onClick={() => {
+                    this.categoryOnClick("vegetables");
+                  }}
+                >
+                  Vegetables
+                </option>
+                <option
+                  onClick={() => {
+                    this.categoryOnClick("fruits");
+                  }}
+                >
+                  Fruits
+                </option>
+                <option
+                  onClick={() => {
+                    this.categoryOnClick("spices");
+                  }}
+                >
+                  Spices
+                </option>
               </CustomInput>
             </FormGroup>
             <div
               className="btn btn-light"
               size="lg"
               style={{ margin: 0, display: "inline" }}
+              onClick={() => {
+                this.onSearchClick(this.state.categoryOnClick);
+              }}
             >
               <i
                 className="glyphicon glyphicon-search"
@@ -471,12 +588,12 @@ class Header extends Component {
 }
 
 const mapStateToProps = globalState => {
-  const auth = globalState.auth;
+  const { auth, products } = globalState;
 
-  return { auth };
+  return { auth, products };
 };
 
 export default connect(
   mapStateToProps,
-  { onLogOut }
+  { onLogOut, categoryOnClick }
 )(Header);

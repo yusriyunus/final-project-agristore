@@ -1,11 +1,13 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+import { categoryOnClick } from "../actioncreators/index";
 import Footer from "./footer";
 import "./css/productscategory.css";
 
 class Productscategory extends Component {
   state = { marginTop: "-45vh" };
   render() {
-    const { Default } = this.props.margin;
+    // const { Default } = this.props.margin;
 
     return (
       <div style={{}}>
@@ -22,7 +24,8 @@ class Productscategory extends Component {
             id="kotak1"
             className="box"
             onClick={() => {
-              Default(0);
+              // Default(0);
+              this.props.pageOnSliding(0, 0);
               this.props.categoryOnClick("cct");
             }}
           >
@@ -37,7 +40,8 @@ class Productscategory extends Component {
             id="kotak3"
             className="box"
             onClick={() => {
-              Default(-500);
+              this.props.pageOnSliding(-500, 0);
+              // Default(-500);
             }}
           >
             <h1>
@@ -48,7 +52,8 @@ class Productscategory extends Component {
             id="kotak4"
             className="box"
             onClick={() => {
-              Default(-100);
+              this.props.pageOnSliding(-100, 0);
+              // Default(-100);
             }}
           >
             <h1>
@@ -59,7 +64,8 @@ class Productscategory extends Component {
             id="kotak5"
             className="box"
             onClick={() => {
-              Default(-200);
+              this.props.pageOnSliding(-200, 0);
+              // Default(-200);
             }}
           >
             <h1>
@@ -70,7 +76,8 @@ class Productscategory extends Component {
             id="kotak6"
             className="box"
             onClick={() => {
-              Default(-300);
+              this.props.pageOnSliding(-300, 0);
+              // Default(-300);
             }}
           >
             <h1>
@@ -81,7 +88,8 @@ class Productscategory extends Component {
             id="kotak8"
             className="box"
             onClick={() => {
-              Default(-600);
+              this.props.pageOnSliding(-600, 0);
+              // Default(-600);
             }}
           >
             <h1>
@@ -103,4 +111,7 @@ class Productscategory extends Component {
   }
 }
 
-export default Productscategory;
+export default connect(
+  null,
+  { categoryOnClick }
+)(Productscategory);

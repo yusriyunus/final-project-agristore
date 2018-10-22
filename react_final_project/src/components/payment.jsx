@@ -29,6 +29,7 @@ class Payment extends Component {
         _idProduct: cart._id,
         _idUser: newProps.auth.id,
         nama: cart.nama,
+        category: cart.category,
         harga: cart.price,
         jumlah: cart.amount,
         totalPrice: cart.totalPrice,

@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import axios from "axios";
-import { API_URL_AGRISTORE } from "../supports/apiurl/apiurl";
+import { connect } from "react-redux";
 import {
   Carousel,
   CarouselItem,
@@ -30,42 +29,25 @@ const items = [
 class Example extends Component {
   state = { activeIndex: 0, cct: [], fruits: [], vegetables: [], spices: [] };
 
-  // GET PRODUCT FROM DB FUNCTION//
-  categoryOnClick = category => {
-    console.log(category);
-    if (this.state[category].length === 0) {
-      axios
-        .get(API_URL_AGRISTORE + `/${category}`)
-        .then(res => {
-          this.state[category] = res.data;
-          this.setState();
-        })
-        .catch(err => {
-          console.log(err);
-        });
+  componentWillReceiveProps(newProps) {
+    if (newProps.margin !== this.props.margin) {
+      document.getElementById("slider").style.transition = "margin-top .6s";
     }
-  };
-  /////////////////////////////////
-
-  // PAGE SLIDER FUNCTION //
-  geser = (a, b) => {
-    document
-      .getElementById("slider")
-      .setAttribute(
-        "style",
-        "margin-left:" +
-          a +
-          "vw; transition:margin-top .4s; margin-Top:" +
-          b +
-          "vh"
-      );
-  };
-  margin = {
-    Default: (a, b = 0, c = 0) => {
-      this.geser(a, b, c);
+    if (
+      newProps.products !== this.props.products &&
+      newProps.products.searchClick
+    ) {
+      const { cct, vegetables, fruits, spices } = newProps.products;
+      this.setState({ cct, vegetables, fruits, spices });
     }
-  };
-  ///////////////////////
+    if (
+      newProps.products !== this.props.products &&
+      !newProps.products.searchClick
+    ) {
+      const { cct, vegetables, fruits, spices } = newProps.products;
+      this.setState({ cct, vegetables, fruits, spices });
+    }
+  }
 
   // CAROUSEL FUNCTION //
   onExiting = () => {
@@ -93,7 +75,7 @@ class Example extends Component {
   ////////////////////////////////
 
   render() {
-    // console.log(this.state);
+    console.log(this.state.cct);
     const { activeIndex } = this.state;
     const slides = items.map(item => {
       return (
@@ -105,7 +87,7 @@ class Example extends Component {
           <img
             src={item.src}
             alt={item.altText}
-            style={{ width: 92 + "vw", height: 50 + "vw", marginLeft: "4vw" }}
+            style={{ width: 92 + "vw", height: 45 + "vw", marginLeft: "4vw" }}
           />
         </CarouselItem>
       );
@@ -143,33 +125,37 @@ class Example extends Component {
         <div
           id="slider"
           style={{
-            marginLeft: "-400vw",
-            marginTop: "-100vh"
+            marginLeft: this.props.margin.marginLeft,
+            marginTop: this.props.margin.marginTop
           }}
         >
           <div>
-            <CCTlist margin={this.margin} productList={this.state.cct} />
-          </div>
-          <div>
-            <Vegetablelist margin={this.margin} />
-          </div>
-          <div>
-            <Fruitlist margin={this.margin} />
-          </div>
-          <div>
-            <Spicelist margin={this.margin} />
-          </div>
-          <div>
-            <Productscategory
-              margin={this.margin}
-              categoryOnClick={this.categoryOnClick}
+            <CCTlist
+              pageOnSliding={this.props.pageOnSliding}
+              productList={this.state.cct}
             />
           </div>
           <div>
-            <Toplist margin={this.margin} />
+            <Vegetablelist pageOnSliding={this.props.pageOnSliding} />
           </div>
           <div>
-            <Hotlist margin={this.margin} />
+            <Fruitlist pageOnSliding={this.props.pageOnSliding} />
+          </div>
+          <div>
+            <Spicelist pageOnSliding={this.props.pageOnSliding} />
+          </div>
+          <div>
+            <Productscategory
+              pageOnSliding={this.props.pageOnSliding}
+              // margin={this.margin}
+              // categoryOnClick={this.categoryOnClick}
+            />
+          </div>
+          <div>
+            <Toplist pageOnSliding={this.props.pageOnSliding} />
+          </div>
+          <div>
+            <Hotlist pageOnSliding={this.props.pageOnSliding} />
           </div>
         </div>
       </div>
@@ -177,4 +163,9 @@ class Example extends Component {
   }
 }
 
-export default Example;
+const mapStateToProps = globalState => {
+  const products = globalState.products;
+  return { products };
+};
+
+export default connect(mapStateToProps)(Example);
