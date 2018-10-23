@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { cartModified } from "../actioncreators";
-import { connect } from "react-redux";
 import { API_URL_AGRISTORE } from "../supports/apiurl/apiurl";
+import { cartModified, categoryOnClick } from "../actioncreators";
+import { connect } from "react-redux";
 // import DikirimDari from "./filterDikirimDari";
 // import Promosi from "./filterPromosi";
 import Footer from "./footer";
@@ -32,24 +32,41 @@ class Sidebar extends Component {
     ],
     color: this.props.sidebarProp.font,
     productOnClick: {},
-    checkBoxAmount: 14
+    checkBoxAmount: 14,
+    starOnClick: this.props.ratingDefault,
+    comment: "",
+    sendStatus: false
   };
 
+  // componentWillMount() {
+
+  // }
+
   componentWillReceiveProps(newProps) {
-    this.setState({ productOnClick: newProps.productOnClick });
+    console.log(newProps);
+    // checking for wheter user have already commented or not
+    if (
+      newProps.productOnClick !== undefined &&
+      newProps.productOnClick.userResponds.length > 0
+    ) {
+      alert("hai");
+      newProps.productOnClick.userResponds.map(responds => {
+        // var sendStatusArr = []
+        if (responds._idUser === newProps.auth.id) {
+          alert("sudah ada comment");
+          this.setState({ sendStatus: true });
+        } else {
+          alert("tidak ada comment");
+          this.setState({ sendStatus: false });
+        }
+      });
+    } else {
+      this.setState({ sendStatus: false });
+    }
+    this.setState({ productOnClick: newProps.productOnClick, starOnClick: 0 });
   }
 
   // DETAIL PRODUCT FUNCTION //
-  renderProductOnClick = () => {
-    if (this.state.productOnClick !== undefined) {
-      return (
-        <div>
-          <h3>{this.state.productOnClick.nama}</h3>;
-        </div>
-      );
-    }
-    return <h3>Loading...</h3>;
-  };
   onCloseClick = () => {
     document.getElementById("detail").style.display = "none";
   };
@@ -65,11 +82,114 @@ class Sidebar extends Component {
         ])
         .then(res => {
           alert("added to cart");
-          this.props.cartModified(res);
+          this.props.categoryOnClick(res);
         })
         .catch(err => {
           console.log(err);
         });
+    }
+  };
+  starOnClick = count => {
+    this.setState({ starOnClick: count });
+  };
+  sendButtonProps = () => {
+    if (this.state.starOnClick === 0 || this.state.comment === "") {
+      return ["lightgray", "none"];
+    } else {
+      return ["rgba(6, 71, 6, 1)", "all"];
+    }
+  };
+  sendOnclick = () => {
+    axios
+      .post(API_URL_AGRISTORE + "/userresponds", {
+        category: this.state.productOnClick.category,
+        _idProduct: this.state.productOnClick._id,
+        _idUser: this.props.auth.id,
+        comment: this.state.comment,
+        rating: this.state.starOnClick,
+        currentRating: this.state.productOnClick.rating
+      })
+      .then(res => {
+        alert("comment added");
+        this.refs.responds.value = "";
+        // console.log(res.data[0]);
+        this.setState({ productOnClick: res.data[0], sendStatus: true });
+        this.props.categoryOnClick(this.state.productOnClick.category);
+      })
+      .catch(err => {
+        alert("sorry something went wrong");
+        console.log(err);
+      });
+  };
+  inputComment = () => {
+    this.setState({ comment: this.refs.responds.value });
+  };
+  renderProductOnClick = () => {
+    if (this.state.productOnClick !== undefined) {
+      return (
+        <div>
+          <h3>{this.state.productOnClick.nama}</h3>;
+        </div>
+      );
+    }
+    return <h3>Loading...</h3>;
+  };
+  renderUserResponds = () => {
+    if (!this.state.sendStatus) {
+      return (
+        <div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              margin: "2em"
+            }}
+          >
+            <Rating
+              starCount={this.state.starOnClick}
+              starOnClick={this.starOnClick}
+            />
+          </div>
+          <div>
+            <div className="col-xs-12">
+              <center>
+                <h4>
+                  <input
+                    id="responds"
+                    ref="responds"
+                    type="text"
+                    style={{
+                      width: "80%",
+                      height: "4vw",
+                      border: "1px solid lightgrey",
+                      padding: "1em"
+                    }}
+                    placeholder="Write comment..."
+                    onChange={this.inputComment}
+                  />
+                  <div
+                    className="row d-flex justify-content-center align-items-center"
+                    style={{
+                      background: this.sendButtonProps()[0],
+                      color: "white",
+                      margin: "0",
+                      height: "2.5vmax",
+                      width: "40%",
+                      cursor: "pointer",
+                      margin: "1em",
+                      borderRadius: "5px",
+                      pointerEvents: this.sendButtonProps()[1]
+                    }}
+                    onClick={this.sendOnclick}
+                  >
+                    <h3>Send</h3>
+                  </div>
+                </h4>
+              </center>
+            </div>
+          </div>
+        </div>
+      );
     }
   };
   ///////////////////////////////
@@ -191,7 +311,9 @@ class Sidebar extends Component {
 
   render() {
     const { title, detail } = this.props.sidebarProp;
-    console.log(this.props);
+    // console.log(this.state.productOnClick, this.props.auth);
+    console.log(this.state.sendStatus, this.state.productOnClick);
+    // alert(document.getElementById("responds").value);
     return (
       <div
         ref="sidebar"
@@ -238,7 +360,7 @@ class Sidebar extends Component {
                 style={{
                   background: "white",
                   width: "42vw",
-                  height: "42vw",
+                  height: "40.5vw",
                   margin: "2vw",
                   marginTop: "3vw",
                   marginLeft: "3vw"
@@ -252,7 +374,7 @@ class Sidebar extends Component {
                 style={{
                   background: "white",
                   width: "43vw",
-                  height: "42vw",
+                  height: "40.5vw",
                   marginTop: "3vw",
                   marginRight: "3vw"
                 }}
@@ -267,7 +389,30 @@ class Sidebar extends Component {
                 >
                   <h3>Add to cart</h3>
                 </div>
-                <Rating ratingDefault={this.props.ratingDefault} />
+                {this.renderUserResponds()}
+              </div>
+            </div>
+          </div>
+          <div className="row" style={{ margin: 0, padding: 0 }}>
+            <div className="col-lg-12">
+              <div
+                style={{
+                  background: "white",
+                  width: "96%",
+                  height: "30vw",
+                  margin: "1.4vw",
+                  padding: "2vw",
+                  marginTop: 0
+                  // flex: 1
+                }}
+              >
+                <h3>0 Comment On this Product</h3>
+                <hr />
+                <h4>Yunus</h4>
+                <div style={{ display: "inline" }}>
+                  <Rating />
+                </div>
+                <h4>TOP BGT!</h4>
               </div>
             </div>
           </div>
@@ -431,5 +576,5 @@ const mapStateToProps = globalState => {
 
 export default connect(
   mapStateToProps,
-  { cartModified }
+  { cartModified, categoryOnClick }
 )(Sidebar);

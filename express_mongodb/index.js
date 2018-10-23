@@ -301,4 +301,65 @@ app.post("/payment", (req, res) => {
   );
 });
 
+app.post("/userresponds", (req, res) => {
+  var {
+    category,
+    _idProduct,
+    _idUser,
+    comment,
+    rating,
+    currentRating
+  } = req.body;
+
+  // average rating
+  var currentRating = [...currentRating, rating];
+  var sumRating = 0;
+  currentRating.map(rating => {
+    sumRating = sumRating += rating;
+  });
+  var avgRating = sumRating / currentRating.length;
+  /////////////////
+
+  MongoClient.connect(
+    url,
+    (err, db) => {
+      let productsCol = db.collection(category);
+      productsCol.update(
+        { _id: mongodb.ObjectId(_idProduct) },
+        {
+          $push: {
+            userResponds: {
+              _idUser,
+              comment,
+              rating
+            }
+          }
+        }
+      );
+      productsCol.update(
+        { _id: mongodb.ObjectId(_idProduct) },
+        {
+          $push: {
+            rating
+          }
+        }
+      );
+      productsCol.update(
+        { _id: mongodb.ObjectId(_idProduct) },
+        {
+          $set: {
+            totalRate: avgRating
+          }
+        }
+      );
+      productsCol
+        .find({ _id: mongodb.ObjectId(_idProduct) })
+        .toArray((err, docs) => {
+          if (err) console.log(err);
+          res.send(docs);
+        });
+    }
+  );
+});
+
 app.listen(port, () => console.log(`API active on port ${port}`));

@@ -2,20 +2,20 @@ import React, { Component } from "react";
 
 class Rating extends Component {
   state = {
-    starOnClick: this.props.ratingDefault
+    // starOnClick: this.props.ratingDefault
   };
 
-  componentWillReceiveProps(newProps) {
-    this.setState({ starOnClick: 0 });
-  }
+  // componentWillReceiveProps(newProps) {
+  //   this.setState({ starOnClick: 0 });
+  // }
 
-  starOnClick = count => {
-    this.setState({ starOnClick: count });
-  };
+  // starOnClick = count => {
+  //   this.setState({ starOnClick: count });
+  // };
 
   renderStar = () => {
     var star = [];
-    if (this.state.starOnClick === 0) {
+    if (this.props.starCount === 0) {
       for (let i = 1; i <= 5; i++) {
         star.push(
           <i
@@ -23,7 +23,7 @@ class Rating extends Component {
             className="glyphicon glyphicon-star-empty"
             style={{ color: "gold", fontSize: "1.5vw", cursor: "pointer" }}
             onClick={() => {
-              this.starOnClick(i);
+              this.props.starOnClick(i);
             }}
           />
         );
@@ -31,14 +31,14 @@ class Rating extends Component {
       return star;
     } else {
       for (let j = 1; j <= 5; j++) {
-        if (j <= this.state.starOnClick) {
+        if (j <= this.props.starCount) {
           star.push(
             <i
               key={j}
               className="glyphicon glyphicon-star"
               style={{ color: "gold", fontSize: "1.5vw", cursor: "pointer" }}
               onClick={() => {
-                this.starOnClick(j);
+                this.props.starOnClick(j);
               }}
             />
           );
@@ -49,7 +49,7 @@ class Rating extends Component {
               className="glyphicon glyphicon-star-empty"
               style={{ color: "gold", fontSize: "1.5vw", cursor: "pointer" }}
               onClick={() => {
-                this.starOnClick(j);
+                this.props.starOnClick(j);
               }}
             />
           );
@@ -60,7 +60,7 @@ class Rating extends Component {
   };
 
   render() {
-    console.log(this.state.starOnClick);
+    console.log(this.props.starCount);
     return (
       <div className="row" style={{ margin: 0, padding: 0 }}>
         {this.renderStar()}
