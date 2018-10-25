@@ -6,15 +6,16 @@ import GridCategory from "./gridcategory";
 import Sidebar from "./sidebar";
 import Rating from "./rating";
 
-class CCTlist extends Component {
+class Vegetablelist extends Component {
   state = {
     sidebarProp: {
-      title: "CCT",
-      detail: "/Coffee, Cocoa, Tea",
+      title: "VEGETABLES",
+      detail: "",
+      color: "green",
       font: "white"
     },
     gridProp: {
-      color: "rgba(0,0,0,0.65)"
+      color: "rgba(0,128,0,0.7)"
     },
     displayDetail: "none",
     productList: this.props.productList,
@@ -29,9 +30,6 @@ class CCTlist extends Component {
     if (newProps.productList.length !== 0) {
       this.setState({ productList: newProps.productList });
     }
-    // if (newProps.products.cct.length !== 0) {
-    //   this.setState({ productList: newProps.products });
-    // }
   }
 
   onFilterDaerahClick = filterBy => {
@@ -61,14 +59,12 @@ class CCTlist extends Component {
   onFilterPromosiClick = filterBy => {
     console.log(filterBy);
     var newList = [];
-    // if (+!this.state.filterPromosiStatus && this.state.filterStatus) {
     this.state.productList.map(product => {
       if (product.promosi === filterBy) {
         newList.push(product);
       }
     });
     this.setState({ productFilter: newList, filterPromosiStatus: true });
-    // }
   };
 
   onFilterHargaClick = (hargamin, hargamaks) => {
@@ -133,7 +129,7 @@ class CCTlist extends Component {
 
   onDeleteAllClick = () => {
     alert("hapus semua");
-    this.props.categoryOnClick("cct");
+    this.props.categoryOnClick("vegetables");
     this.setState({
       productFilter: [],
       filterStatus: false,
@@ -147,8 +143,6 @@ class CCTlist extends Component {
       (this.state.productList.length === 0 && this.state.filterStatus) ||
       (this.state.filterPromosiStatus && this.state.productFilter.length === 0)
     ) {
-      alert("tidak ada produk");
-      // else {
       return (
         <GridCategory
           background={this.state.gridProp.color}
@@ -162,7 +156,6 @@ class CCTlist extends Component {
       this.state.productFilter.length !== 0 &&
       this.state.filterPromosiStatus
     ) {
-      // alert("sort sebelum filter");
       return this.state.productFilter.map((product, index) => {
         return (
           <GridCategory
@@ -176,7 +169,6 @@ class CCTlist extends Component {
       });
     }
     if (this.props.productList.length !== 0) {
-      alert("sort sebelum filter");
       return this.state.productList.map((product, index) => {
         return (
           <GridCategory
@@ -185,6 +177,7 @@ class CCTlist extends Component {
             onDetailClick={() => this.onDetailClick(index)}
             product={product.nama}
             harga={product.price}
+            rating={product.totalRate}
             stok={product.stokTersedia}
           />
         );
@@ -202,6 +195,7 @@ class CCTlist extends Component {
             <img src={loading} style={{ width: "4vw", height: "auto" }} />
           }
           harga="0"
+          rating=""
           stok="-"
         />
       );
@@ -213,12 +207,11 @@ class CCTlist extends Component {
   };
 
   render() {
-    console.log(this.props.products);
     // const { Default } = this.props.margin;
     return (
-      <div className="sliderPage" style={{}}>
+      <div className="sliderPage">
         <div className="row" style={{ margin: 0 }}>
-          <div style={{}}>
+          <div>
             <Sidebar
               sidebarProp={this.state.sidebarProp}
               display={this.state.displayDetail}
@@ -245,10 +238,7 @@ class CCTlist extends Component {
             <div style={{ position: "sticky", top: "5vw", zIndex: "2" }}>
               <div
                 className="row justify-content-center"
-                style={{
-                  padding: "0",
-                  marginTop: "-10px"
-                }}
+                style={{ padding: "0", marginTop: "-10px" }}
               >
                 <div
                   className="d-flex align-items-center"
@@ -258,10 +248,8 @@ class CCTlist extends Component {
                     padding: "2px 10px",
                     borderRadius: "10px",
                     cursor: "pointer"
-                    // zIndex: 1
                   }}
                   onClick={() => {
-                    // Default(-400, -100, 0.3);
                     this.props.pageOnSliding(-400, -100);
                   }}
                 >
@@ -275,7 +263,7 @@ class CCTlist extends Component {
             </div>
             <div
               className="row justify-content-center"
-              style={{ margin: "0 10px" }}
+              style={{ margin: 10 + "px" }}
             >
               {this.renderProductList()}
             </div>
@@ -288,11 +276,10 @@ class CCTlist extends Component {
 
 const mapStateToProps = globalState => {
   const { auth, products } = globalState;
-  // const products = globalState.products;
   return { auth, products };
 };
 
 export default connect(
   mapStateToProps,
   { categoryOnClick }
-)(CCTlist);
+)(Vegetablelist);

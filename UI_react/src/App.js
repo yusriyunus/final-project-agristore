@@ -1,15 +1,9 @@
 import React, { Component } from "react";
-// import { Route, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { withRouter } from "react-router-dom";
 import Cookies from "universal-cookie";
 import AppInit from "./components/appInit.jsx";
 import { keepLogin } from "./actioncreators";
-// import "./components/css/app.css";
-// import Home from "./components/home";
-// import Header from "./components/header";
-// import Checkout from "./components/checkout";
-// import Payment from "./components/payment";
 
 const cookies = new Cookies();
 

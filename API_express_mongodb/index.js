@@ -51,7 +51,14 @@ app.post("/keeplogin", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  var { username, email, password } = req.body;
+  var {
+    username,
+    email,
+    password,
+    cart,
+    cartOnCheckOut,
+    transaksiBerhasil
+  } = req.body;
 
   MongoClient.connect(
     url,
@@ -69,7 +76,16 @@ app.post("/register", (req, res) => {
             .digest("hex");
 
           userCol.insertMany(
-            [{ username, email, password: passwordEncripted }],
+            [
+              {
+                username,
+                email,
+                password: passwordEncripted,
+                cart: [],
+                cartOnCheckOut: [],
+                transaksiBerhasil: []
+              }
+            ],
             (err2, result) => {
               db.close();
               res.send({ err: "", user: result.ops[0] });
@@ -100,6 +116,90 @@ app.post("/cct", (req, res) => {
       url,
       (err, db) => {
         productCol = db.collection("cct");
+        productCol.find({ nama }).toArray((err1, docs) => {
+          if (err1) console.log(err1);
+          res.send(docs);
+        });
+      }
+    );
+  }
+});
+
+app.post("/fruits", (req, res) => {
+  const { nama } = req.body;
+  console.log(req.body);
+  if (nama === undefined) {
+    MongoClient.connect(
+      url,
+      (err, db) => {
+        productCol = db.collection("fruits");
+        productCol.find().toArray((err1, docs) => {
+          if (err1) console.log(err1);
+          res.send(docs);
+        });
+      }
+    );
+  } else {
+    MongoClient.connect(
+      url,
+      (err, db) => {
+        productCol = db.collection("fruits");
+        productCol.find({ nama }).toArray((err1, docs) => {
+          if (err1) console.log(err1);
+          res.send(docs);
+        });
+      }
+    );
+  }
+});
+
+app.post("/vegetables", (req, res) => {
+  const { nama } = req.body;
+  console.log(req.body);
+  if (nama === undefined) {
+    MongoClient.connect(
+      url,
+      (err, db) => {
+        productCol = db.collection("vegetables");
+        productCol.find().toArray((err1, docs) => {
+          if (err1) console.log(err1);
+          res.send(docs);
+        });
+      }
+    );
+  } else {
+    MongoClient.connect(
+      url,
+      (err, db) => {
+        productCol = db.collection("vegetables");
+        productCol.find({ nama }).toArray((err1, docs) => {
+          if (err1) console.log(err1);
+          res.send(docs);
+        });
+      }
+    );
+  }
+});
+
+app.post("/spices", (req, res) => {
+  const { nama } = req.body;
+  console.log(req.body);
+  if (nama === undefined) {
+    MongoClient.connect(
+      url,
+      (err, db) => {
+        productCol = db.collection("spices");
+        productCol.find().toArray((err1, docs) => {
+          if (err1) console.log(err1);
+          res.send(docs);
+        });
+      }
+    );
+  } else {
+    MongoClient.connect(
+      url,
+      (err, db) => {
+        productCol = db.collection("spices");
         productCol.find({ nama }).toArray((err1, docs) => {
           if (err1) console.log(err1);
           res.send(docs);
@@ -253,8 +353,8 @@ app.post("/payment", (req, res) => {
   MongoClient.connect(
     url,
     (err, db) => {
-      console.log(cartOnCheckOut);
-      console.log(cartOnCheckOutId);
+      // console.log(cartOnCheckOut);
+      // console.log(cartOnCheckOutId);
       userCol = db.collection("users");
       transactionCol = db.collection("transaction");
       // var index = 0;
@@ -306,6 +406,7 @@ app.post("/userresponds", (req, res) => {
     category,
     _idProduct,
     _idUser,
+    userName,
     comment,
     rating,
     currentRating
@@ -330,6 +431,7 @@ app.post("/userresponds", (req, res) => {
           $push: {
             userResponds: {
               _idUser,
+              userName,
               comment,
               rating
             }
@@ -354,6 +456,55 @@ app.post("/userresponds", (req, res) => {
       );
       productsCol
         .find({ _id: mongodb.ObjectId(_idProduct) })
+        .toArray((err, docs) => {
+          if (err) console.log(err);
+          res.send(docs);
+        });
+    }
+  );
+});
+
+app.post("/deleteresponds", (req, res) => {
+  const { productOnClick, indexComment } = req.body;
+
+  var newUserResponds = [...productOnClick.userResponds];
+  if (indexComment === newUserResponds.length) {
+    newUserResponds.pop();
+  } else {
+    newUserResponds.splice(indexComment, 1);
+  }
+
+  var newRating = [...productOnClick.rating];
+  if (indexComment === newRating.length) {
+    newRating.pop();
+  } else {
+    newRating.splice(indexComment, 1);
+  }
+
+  var sumRating = 0;
+  newRating.map(rating => {
+    sumRating = sumRating += rating;
+  });
+  var avgRating = sumRating / newRating.length;
+
+  MongoClient.connect(
+    url,
+    (err, db) => {
+      productCol = db.collection(productOnClick.category);
+      productCol.update(
+        {
+          _id: mongodb.ObjectId(productOnClick._id)
+        },
+        {
+          $set: {
+            userResponds: newUserResponds,
+            rating: newRating,
+            totalRate: avgRating
+          }
+        }
+      );
+      productCol
+        .find({ _id: mongodb.ObjectId(productOnClick._id) })
         .toArray((err, docs) => {
           if (err) console.log(err);
           res.send(docs);

@@ -1,10 +1,8 @@
 import React, { Component } from "react";
 import axios from "axios";
 import { API_URL_AGRISTORE } from "../supports/apiurl/apiurl";
-import { cartModified, categoryOnClick } from "../actioncreators";
+import { cartModified, categoryOnClick, onLogin } from "../actioncreators";
 import { connect } from "react-redux";
-// import DikirimDari from "./filterDikirimDari";
-// import Promosi from "./filterPromosi";
 import Footer from "./footer";
 import Rating from "./rating";
 
@@ -32,38 +30,34 @@ class Sidebar extends Component {
     ],
     color: this.props.sidebarProp.font,
     productOnClick: {},
-    checkBoxAmount: 14,
     starOnClick: this.props.ratingDefault,
     comment: "",
     sendStatus: false
   };
 
-  // componentWillMount() {
-
-  // }
-
   componentWillReceiveProps(newProps) {
     console.log(newProps);
+    this.setState({ productOnClick: newProps.productOnClick, starOnClick: 0 });
     // checking for wheter user have already commented or not
     if (
       newProps.productOnClick !== undefined &&
       newProps.productOnClick.userResponds.length > 0
     ) {
-      alert("hai");
+      var findComment = false;
       newProps.productOnClick.userResponds.map(responds => {
-        // var sendStatusArr = []
         if (responds._idUser === newProps.auth.id) {
-          alert("sudah ada comment");
-          this.setState({ sendStatus: true });
-        } else {
-          alert("tidak ada comment");
-          this.setState({ sendStatus: false });
+          findComment = true;
         }
       });
+      if (findComment) {
+        this.setState({ sendStatus: true });
+      } else {
+        this.setState({ sendStatus: false });
+      }
     } else {
       this.setState({ sendStatus: false });
     }
-    this.setState({ productOnClick: newProps.productOnClick, starOnClick: 0 });
+    ////////////////////////////////////
   }
 
   // DETAIL PRODUCT FUNCTION //
@@ -82,7 +76,7 @@ class Sidebar extends Component {
         ])
         .then(res => {
           alert("added to cart");
-          this.props.categoryOnClick(res);
+          this.props.cartModified(res, this.props.auth.cartOnCheckOut);
         })
         .catch(err => {
           console.log(err);
@@ -105,6 +99,7 @@ class Sidebar extends Component {
         category: this.state.productOnClick.category,
         _idProduct: this.state.productOnClick._id,
         _idUser: this.props.auth.id,
+        userName: this.props.auth.username,
         comment: this.state.comment,
         rating: this.state.starOnClick,
         currentRating: this.state.productOnClick.rating
@@ -124,30 +119,130 @@ class Sidebar extends Component {
   inputComment = () => {
     this.setState({ comment: this.refs.responds.value });
   };
+  onDeleteCommentClick = (productOnClick, indexComment) => {
+    axios
+      .post(API_URL_AGRISTORE + "/deleteresponds", {
+        productOnClick,
+        indexComment
+      })
+      .then(res => {
+        console.log(res.data[0]);
+        alert("comment deleted");
+        this.setState({ productOnClick: res.data[0], sendStatus: false });
+        this.props.categoryOnClick(this.state.productOnClick.category);
+      })
+      .catch(err => {
+        alert("sorry something went wrong");
+        console.log(err);
+      });
+  };
   renderProductOnClick = () => {
     if (this.state.productOnClick !== undefined) {
       return (
         <div>
-          <h3>{this.state.productOnClick.nama}</h3>;
+          <h3>{this.state.productOnClick.nama}</h3>
+          <Rating
+            starCount={this.state.productOnClick.totalRate}
+            fontSize="2vw"
+            pointerEvents="none"
+          />
         </div>
       );
     }
     return <h3>Loading...</h3>;
   };
+  renderProductOnClickDetail = () => {
+    if (this.state.productOnClick !== undefined) {
+      return (
+        <div>
+          <h1 style={{ padding: "2vw", paddingBottom: 0 }}>
+            <b>Deskripsi</b>
+          </h1>
+          <hr />
+          <hr />
+          <div style={{ paddingLeft: "3vw" }}>
+            <i>
+              <h2>
+                <b>Nama Produk:</b>
+              </h2>
+              <h3 style={{ paddingLeft: "1vw" }}>
+                {this.state.productOnClick.nama}
+              </h3>
+              <h2>
+                <b>Category:</b>
+              </h2>
+              <h3 style={{ paddingLeft: "1vw" }}>
+                {this.state.productOnClick.category}
+              </h3>
+              <h2>
+                <b>Lokasi Pengirim:</b>
+                <h3 style={{ paddingLeft: "1vw" }}>
+                  {this.state.productOnClick.lokasiPengirim}
+                </h3>
+              </h2>
+              <h2>
+                <b>Stok Tersedia:</b>
+              </h2>
+              <h3 style={{ paddingLeft: "1vw" }}>
+                {this.state.productOnClick.stokTersedia}
+              </h3>
+              <h2>
+                <b>Promosi:</b>
+              </h2>
+              <h3 style={{ paddingLeft: "1vw" }}>
+                {this.state.productOnClick.promosi}
+              </h3>
+              <h2>
+                <b>Harga:</b>
+              </h2>
+              <h3 style={{ paddingLeft: "1vw" }}>
+                Rp.
+                {this.state.productOnClick.price}
+              </h3>
+            </i>
+          </div>
+        </div>
+      );
+    }
+  };
+  renderCardCommentTitle = () => {
+    if (this.props.productOnClick !== undefined) {
+      return (
+        <div>
+          <h3>
+            {this.state.productOnClick.userResponds.length} Comment On this
+            Product
+          </h3>
+          <hr />
+          <hr />
+        </div>
+      );
+    }
+  };
   renderUserResponds = () => {
     if (!this.state.sendStatus) {
       return (
-        <div>
+        <div
+          style={{
+            position: "absolute",
+            bottom: "2.6vw",
+            padding: "1vw",
+            width: "90%"
+          }}
+        >
           <div
             style={{
               display: "flex",
               justifyContent: "center",
+              // alignItems: "end",
               margin: "2em"
             }}
           >
             <Rating
               starCount={this.state.starOnClick}
               starOnClick={this.starOnClick}
+              fontSize="1.5vw"
+              pointerEvents="all"
             />
           </div>
           <div>
@@ -192,44 +287,92 @@ class Sidebar extends Component {
       );
     }
   };
+  renderProductComments = () => {
+    if (this.props.productOnClick !== undefined) {
+      if (this.state.productOnClick.userResponds.length > 0) {
+        return this.state.productOnClick.userResponds.map((responds, index) => {
+          return (
+            <div>
+              <div style={{ marginLeft: "1.5vw" }}>
+                <h4>
+                  <b>{responds.userName}</b>
+                </h4>
+                {this.renderDeleteComment(index)}
+                <div style={{ marginLeft: "1vw" }}>
+                  <Rating
+                    starCount={responds.rating}
+                    fontSize=".8vw"
+                    pointerEvents="none"
+                  />
+                  <h4>{responds.comment}</h4>
+                </div>
+              </div>
+              <hr />
+            </div>
+          );
+        });
+      }
+    } else {
+      return <h3 />;
+    }
+  };
+  renderDeleteComment = index => {
+    if (
+      this.state.productOnClick.userResponds[index]._idUser ===
+      this.props.auth.id
+    ) {
+      return (
+        <h6
+          style={{ cursor: "pointer" }}
+          onClick={() =>
+            this.onDeleteCommentClick(this.state.productOnClick, index)
+          }
+        >
+          (delete comment)
+        </h6>
+      );
+    } else {
+      return <h6 />;
+    }
+  };
   ///////////////////////////////
 
   // SIDEBAR PROPS FUNCTION //
   onSortClick = (id, index) => {
     for (var i = 0; i < this.state.sort.length; i++) {
-      document.getElementById(`sort${i}`).checked = false;
+      this.refs[`sort${i}`].checked = false;
     }
-    document.getElementById(id).checked = true;
+    this.refs[id].checked = true;
     this.props.sorting(index);
   };
 
   onFilterDaerah = (id, filterBy) => {
     if (
-      document.getElementById("promosi0").checked === true ||
-      document.getElementById("promosi1").checked === true
+      this.refs["promosi0"].checked === true ||
+      this.refs["promosi1"].checked === true
     ) {
       for (var i = 0; i < this.state.promosi.length; i++) {
-        document.getElementById(`promosi${i}`).checked = false;
+        this.refs[`promosi${i}`].checked = false;
       }
       for (var i = 0; i < this.state.lokasiPengirim.length; i++) {
-        document.getElementById(`filter${i}`).checked = false;
+        this.refs[`filter${i}`].checked = false;
       }
-      document.getElementById(id).checked = true;
+      this.refs[id].checked = true;
       this.props.filterDaerah(filterBy);
     } else {
       for (var i = 0; i < this.state.lokasiPengirim.length; i++) {
-        document.getElementById(`filter${i}`).checked = false;
+        this.refs[`filter${i}`].checked = false;
       }
-      document.getElementById(id).checked = true;
+      this.refs[id].checked = true;
       this.props.filterDaerah(filterBy);
     }
   };
 
   onFilterPromosi = (id, filterBy) => {
     for (var i = 0; i < this.state.promosi.length; i++) {
-      document.getElementById(`promosi${i}`).checked = false;
+      this.refs[`promosi${i}`].checked = false;
     }
-    document.getElementById(id).checked = true;
+    this.refs[id].checked = true;
     this.props.filterPromosi(filterBy);
   };
 
@@ -240,24 +383,27 @@ class Sidebar extends Component {
   };
 
   onDeleteAllClick = () => {
-    // document.getElementsByClassName("checkbox").checked = true;
-    for (var i = 0; i < this.state.checkBoxAmount; i++) {
-      document.getElementsByClassName("checkbox")[i].checked = false;
+    for (var i = 0; i < this.state.lokasiPengirim.length; i++) {
+      this.refs[`filter${i}`].checked = false;
     }
-    this.refs.hargamin.value = "RP MIN";
-    this.refs.hargamaks.value = "RP MAKS";
-    // this.setState({});
+    for (var i = 0; i < this.state.promosi.length; i++) {
+      this.refs[`promosi${i}`].checked = false;
+    }
+    for (var i = 0; i < this.state.sort.length; i++) {
+      this.refs[`sort${i}`].checked = false;
+    }
+    this.refs.hargamin.value = "";
+    this.refs.hargamaks.value = "";
     this.props.deleteAll();
   };
 
   renderDikirimDari = () => {
     return this.state.lokasiPengirim.map((component, index) => (
-      // <DikirimDari key={index} daerah={x} />
       <label className="container">
         <div className="row">
           <input
             id={`filter${index}`}
-            className="checkbox"
+            ref={`filter${index}`}
             type="checkbox"
             value="Jabodetabek"
             onChange={() => {
@@ -275,7 +421,7 @@ class Sidebar extends Component {
         <div className="row">
           <input
             id={`promosi${index}`}
-            className="checkbox"
+            ref={`promosi${index}`}
             type="checkbox"
             onChange={() => {
               this.onFilterPromosi("promosi" + index, component);
@@ -287,14 +433,13 @@ class Sidebar extends Component {
     ));
   };
   renderSort = () => {
-    // return this.state.sort.map((x, index) => <Sort key={index} sort={x} />);
     return this.state.sort.map((component, index) => {
       return (
         <label className="container">
           <div className="row">
             <input
               id={`sort${index}`}
-              className="checkbox"
+              ref={`sort${index}`}
               type="checkbox"
               value="Jabodetabek"
               onChange={() => {
@@ -311,9 +456,6 @@ class Sidebar extends Component {
 
   render() {
     const { title, detail } = this.props.sidebarProp;
-    // console.log(this.state.productOnClick, this.props.auth);
-    console.log(this.state.sendStatus, this.state.productOnClick);
-    // alert(document.getElementById("responds").value);
     return (
       <div
         ref="sidebar"
@@ -355,7 +497,7 @@ class Sidebar extends Component {
             />
           </div>
           <div className="row">
-            <div className="col-lg-6" style={{ padding: "0" }}>
+            <div className="col-lg-6 " style={{ padding: "0" }}>
               <div
                 style={{
                   background: "white",
@@ -366,7 +508,34 @@ class Sidebar extends Component {
                   marginLeft: "3vw"
                 }}
               >
-                <h3>{this.renderProductOnClick()}</h3>
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "3.5vw",
+                    padding: "1vw",
+                    width: "90%"
+                  }}
+                >
+                  <div style={{ margin: "1vw" }}>
+                    {this.renderProductOnClick()}
+                  </div>
+                  <div className="row d-flex justify-content-center align-items-center">
+                    <div
+                      className="d-flex justify-content-center align-items-center"
+                      style={{
+                        background: "rgba(6, 71, 6, 1)",
+                        height: "2.5vmax",
+                        width: "70%",
+                        color: "white",
+                        cursor: "pointer",
+                        borderRadius: "5px"
+                      }}
+                      onClick={this.onAddToCartClick}
+                    >
+                      <h3>Add to cart</h3>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="col-lg-6" style={{ padding: "0" }}>
@@ -379,16 +548,7 @@ class Sidebar extends Component {
                   marginRight: "3vw"
                 }}
               >
-                <div
-                  style={{
-                    background: "black",
-                    color: "white",
-                    cursor: "pointer"
-                  }}
-                  onClick={this.onAddToCartClick}
-                >
-                  <h3>Add to cart</h3>
-                </div>
+                {this.renderProductOnClickDetail()}
                 {this.renderUserResponds()}
               </div>
             </div>
@@ -406,13 +566,8 @@ class Sidebar extends Component {
                   // flex: 1
                 }}
               >
-                <h3>0 Comment On this Product</h3>
-                <hr />
-                <h4>Yunus</h4>
-                <div style={{ display: "inline" }}>
-                  <Rating />
-                </div>
-                <h4>TOP BGT!</h4>
+                {this.renderCardCommentTitle()}
+                {this.renderProductComments()}
               </div>
             </div>
           </div>
@@ -576,5 +731,5 @@ const mapStateToProps = globalState => {
 
 export default connect(
   mapStateToProps,
-  { cartModified, categoryOnClick }
+  { cartModified, categoryOnClick, onLogin }
 )(Sidebar);

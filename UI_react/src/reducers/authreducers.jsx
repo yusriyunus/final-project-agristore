@@ -5,6 +5,7 @@ const INITIAL_STATE = {
   password: "",
   cart: [],
   cartOnCheckOut: [],
+  transaksiBerhasil: [],
   cookie: false
 };
 

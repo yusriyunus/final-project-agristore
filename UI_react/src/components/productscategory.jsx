@@ -53,7 +53,7 @@ class Productscategory extends Component {
             className="box"
             onClick={() => {
               this.props.pageOnSliding(-100, 0);
-              // Default(-100);
+              this.props.categoryOnClick("vegetables");
             }}
           >
             <h1>
@@ -65,7 +65,7 @@ class Productscategory extends Component {
             className="box"
             onClick={() => {
               this.props.pageOnSliding(-200, 0);
-              // Default(-200);
+              this.props.categoryOnClick("fruits");
             }}
           >
             <h1>
@@ -77,7 +77,7 @@ class Productscategory extends Component {
             className="box"
             onClick={() => {
               this.props.pageOnSliding(-300, 0);
-              // Default(-300);
+              this.props.categoryOnClick("spices");
             }}
           >
             <h1>

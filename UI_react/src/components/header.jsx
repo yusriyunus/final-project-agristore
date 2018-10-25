@@ -47,6 +47,7 @@ class Header extends Component {
   };
 
   componentWillReceiveProps(newProps) {
+    console.log(newProps);
     var amount = 0;
     this.cartAmount = () => {
       newProps.auth.cart.map(product => {
@@ -61,8 +62,12 @@ class Header extends Component {
       });
       // alert("login succes");
     }
-    if (newProps.auth.cart !== this.props.auth.cart) {
-      this.setState({ cart: newProps.auth.cart, amount: this.cartAmount() });
+    if (newProps.auth.cart.length !== this.props.auth.cart.length) {
+      console.log(newProps.auth);
+      this.setState({
+        cart: newProps.auth.cart,
+        amount: newProps.auth.cart.length
+      });
     }
     if (!newProps.products.searchClick) {
       document.getElementById("searchBox").value = null;
@@ -315,7 +320,7 @@ class Header extends Component {
                       <div
                         style={{
                           position: "absolute",
-                          bottom: "1vw"
+                          bottom: "1.8vw"
                         }}
                       >
                         <Link to="/checkout">
@@ -551,7 +556,13 @@ class Header extends Component {
                     </div>
                     {this.renderCartList()}
                   </div>
-                  <div className="row d-flex justify-content-center align-items-center">
+                  <div
+                    className="row d-flex justify-content-center align-items-center"
+                    style={{
+                      position: "relative",
+                      bottom: "1.8vw"
+                    }}
+                  >
                     <Link to="/checkout">
                       <DropdownItem style={{ padding: "0" }}>
                         <div onClick={this.toggle} className="btn btn-success">

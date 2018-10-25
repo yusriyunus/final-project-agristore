@@ -36,6 +36,7 @@ export const keepLogin = email => {
             email: user.data[0].email,
             cart: user.data[0].cart,
             cartOnCheckOut: user.data[0].cartOnCheckOut,
+            transaksiBerhasil: user.data[0].transaksiBerhasil,
             error: ""
           }
         });
@@ -64,6 +65,7 @@ export const onRegister = user => {
           password: res.data.user.password,
           cart: [],
           cartOnCheckOut: [],
+          transaksiBerhasil: [],
           error: res.data.err
         }
       });

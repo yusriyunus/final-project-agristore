@@ -136,13 +136,22 @@ class Example extends Component {
             />
           </div>
           <div>
-            <Vegetablelist pageOnSliding={this.props.pageOnSliding} />
+            <Vegetablelist
+              pageOnSliding={this.props.pageOnSliding}
+              productList={this.state.vegetables}
+            />
           </div>
           <div>
-            <Fruitlist pageOnSliding={this.props.pageOnSliding} />
+            <Fruitlist
+              pageOnSliding={this.props.pageOnSliding}
+              productList={this.state.fruits}
+            />
           </div>
           <div>
-            <Spicelist pageOnSliding={this.props.pageOnSliding} />
+            <Spicelist
+              pageOnSliding={this.props.pageOnSliding}
+              productList={this.state.spices}
+            />
           </div>
           <div>
             <Productscategory

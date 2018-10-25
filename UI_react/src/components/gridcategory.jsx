@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import Rating from "./rating";
+
 class GridCategory extends Component {
   render() {
     return (
@@ -24,16 +26,33 @@ class GridCategory extends Component {
             height: 30 + "%",
             background: this.props.background,
             cursor: "pointer",
-            color: "white"
+            color: this.props.color || "white"
           }}
           onClick={this.props.onDetailClick}
         >
-          <center>
-            <h3>
-              {this.props.product}/{this.props.harga}
-            </h3>
-            <h2>{this.props.stok}</h2>
-          </center>
+          {/* <center> */}
+          <div className="col">
+            <div className="row justify-content-center ">
+              <h3>{this.props.product}</h3>
+            </div>
+            <div className="row justify-content-center ">
+              <h3>
+                <Rating
+                  starCount={this.props.rating}
+                  fontSize="1vw"
+                  pointerStatus="none"
+                  color="white"
+                />
+              </h3>
+            </div>
+            <div className="row justify-content-center ">
+              <h2>
+                Rp.
+                {this.props.harga}
+              </h2>
+            </div>
+          </div>
+          {/* </center> */}
         </div>
       </div>
     );
