@@ -87,7 +87,6 @@ class Header extends Component {
       var searchBox = document.getElementById("searchBox");
       searchBox.value =
         searchBox.value.charAt(0).toUpperCase() + searchBox.value.slice(1);
-      console.log(searchBox.value);
       if (searchBox.value !== "") {
         this.props.categoryOnClick(category, searchBox.value);
       } else {
@@ -136,7 +135,6 @@ class Header extends Component {
   };
 
   render() {
-    console.log(this.state);
     if (this.props.auth.username === "") {
       // console.log(this.state.isOpen);
       return (
@@ -580,9 +578,11 @@ class Header extends Component {
                   </h3>
                 </DropdownToggle>
                 <DropdownMenu right>
-                  <DropdownItem>
-                    <h4>Profile</h4>
-                  </DropdownItem>
+                  <Link to="/profile">
+                    <DropdownItem>
+                      <h4>Profile</h4>
+                    </DropdownItem>
+                  </Link>
                   <DropdownItem divider />
                   <DropdownItem onClick={this.onLogOutClick}>
                     <h4>Logout</h4>

@@ -6,6 +6,7 @@ import Home from "./home";
 import Header from "./header";
 import Checkout from "./checkout";
 import Payment from "./payment";
+import Profile from "./profile";
 
 class AppInit extends Component {
   state = { margin: { marginLeft: "-400vw", marginTop: "-100vh" } };
@@ -35,6 +36,7 @@ class AppInit extends Component {
           render={() => <Checkout user={this.props.auth} />}
         />
         <Route path="/payment" component={Payment} />
+        <Route path="/profile" component={Profile} />
       </div>
     );
   }

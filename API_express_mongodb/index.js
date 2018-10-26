@@ -345,20 +345,14 @@ app.post("/checkout", (req, res) => {
 });
 
 app.post("/payment", (req, res) => {
-  console.log(req.body);
   var { email, cartOnCheckOut } = req.body[0];
   var cartOnCheckOutId = req.body[1];
   var usertransaction = req.body[2];
-  // var products = req.body[3];
   MongoClient.connect(
     url,
     (err, db) => {
-      // console.log(cartOnCheckOut);
-      // console.log(cartOnCheckOutId);
       userCol = db.collection("users");
       transactionCol = db.collection("transaction");
-      // var index = 0;
-      // Update product's amount available
       usertransaction.map((product, index) => {
         if (
           cartOnCheckOut[index].stokTersedia - cartOnCheckOut[index].amount >
@@ -509,6 +503,20 @@ app.post("/deleteresponds", (req, res) => {
           if (err) console.log(err);
           res.send(docs);
         });
+    }
+  );
+});
+
+app.post("/gethistorytransaction", (req, res) => {
+  var { id } = req.body;
+  MongoClient.connect(
+    url,
+    (err, db) => {
+      transactionCol = db.collection("transaction");
+      transactionCol.find({ _idUser: id }).toArray((err, docs) => {
+        if (err) console.log(err);
+        res.send(docs);
+      });
     }
   );
 });
